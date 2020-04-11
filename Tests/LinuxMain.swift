@@ -1,6 +1,6 @@
 import XCTest
 
-import UIntXTests
+@testable import UIntXTests
 
 var tests = [XCTestCaseEntry]()
 tests += UIntXComparableTests.allTests()
