@@ -1,7 +1,7 @@
 # UIntX
 ![Swift 5.2](https://img.shields.io/badge/Swift-5.2-orange.svg)
 [![Swift Package Manager](https://img.shields.io/badge/spm-compatible-brightgreen.svg?style=flat)](https://swift.org/package-manager)
-![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub tag](https://img.shields.io/github/tag/rkreutz/UIntX.svg)](https://GitHub.com/rkreutz/UIntX/tags/)
 ![MacOS](https://github.com/rkreutz/UIntX/workflows/MacOS/badge.svg?branch=master&event=push)
 ![Linux](https://github.com/rkreutz/UIntX/workflows/Linux/badge.svg?branch=master&event=push)
