@@ -15,7 +15,7 @@ typealias UIntX16 = UIntX<UInt16>
 typealias UIntX32 = UIntX<UInt32>
 typealias UIntX64 = UIntX<UInt64>
 ```
-These are there strictly for convenience so `UIntX` is already specialised, you may use them or use the completed declaration of `UIntX` specialising it's base value, e.g. `UIntX<UInt>`.
+These are there strictly for convenience so `UIntX` is already specialised, you may use them or use the complete declaration of `UIntX` specialising it's base value, e.g. `UIntX<UInt>`.
 
 There are two prefered ways of initialising `UIntX`. The first one is the most straight forward, you just need to provide a `UnsignedInteger` as the initialiser sole argument, like:
 ```swift
@@ -68,24 +68,31 @@ value != 4      // true
 
 ## Technical limit of UIntX
 
-`UIntX` is basically a container for storing words of the base value. To do so we store those words in an array (internally referred as `parts`). Arrays in Swift default to using `Int` indexes which means you can only store as many elements in the array as `Int` itself can handle (which is `Int.max`), since `Int` is a `SignedNumber` one of it's bits (the most significant one) is used to store the sign info, which leaves us with `Int.max` as 2^63 (for a `64-bit` OS). If we use a base value of `UInt64` (64-bit) will mean that each word will be able to store 64 bits, so if we have 1 word we'll have a 64 bits number, if we have 2 words we'll have a 128 bits number, and so on:
-```
+`UIntX` is basically a container for storing words of the base value. To do so we store those words in an array (internally referred as `parts`). Arrays in Swift default to using `Int` indexes which means you can only store as many elements in the array as `Int` itself can handle (which is `Int.max`), since `Int` is a `SignedNumber` one of it's bits (the most significant one) is used to store the sign info, which leaves us with `Int.max` as 2<sup>63</sup> (for a `64-bit` OS). If we use a base value of `UInt64` (64-bit) will mean that each word will be able to store 64 bits, so if we have 1 word we'll have a 64 bits number, if we have 2 words we'll have a 128 bits number, and so on:
+```swift
 let baseValueBitWidth = 64 // base value number of bits
 let indexes = 2^63 // maximum number of words that can be stored
 let totalNumberOfBits = baseValueBitWidth * indexes // 64 * 2^63 = 2^6 * 2^63 = 2^69
 ```
-So in the end we'll end up with a number that has **$2^69$ bits** which means that the maximum number we can reach is **$2^($2^69$)$**. That's a huge number, let's try converting it to a base 10 powered number so it's a little bit easier to conceive its value. 
+So in the end we'll end up with a number that has **2<sup>69</sup> bits** which means that the maximum number we can reach is **2<sup>(2<sup>69</sup>)</sup>**. That's a huge number, let's try converting it to a base 10 powered number so it's a little bit easier to conceive its value. 
 
 Every time you power 2 to a multiple of 10, the resulting number can be _roughly_ converted to 10 to the power of 3:
-$2^10$ = 1,024   ~   $10^3$ = 1,000
-$2^20$ = 1,048,576   ~    $10^6$ = 1,000,000
-$2^30$ = 1,073,741,824   ~    $10^9$ = 1,000,000,000
-So $2^69$ could be decomposed as $2^70$ $\prod$ $2^-1$ (= 0.5), which in turn can be approximated to:
-$0.5_10^21$
-That's the amount of bits we have in that number: roughly 500 billion billion bits.
-Ok, that's a huge amount of bits, now let's convert that to an actuall number:
-$2^(5*$10^20$)$   ~   $10^(5*$10^19$*3)$ = $10^(1.5$10^20$)$ = $10^($10^20$)$ * $10^(5*$10^19$)$
-So we have a number of: a 100 billion billion times a 50 billion billion; which is **5 thousand billion billion billion billion** (or simply 5*$10^39$).
+
+2<sup>10</sup> = 1,024   ~   10<sup>3</sup> = 1,000
+
+2<sup>20</sup> = 1,048,576   ~    10<sup>6</sup> = 1,000,000
+
+2<sup>30</sup> = 1,073,741,824   ~    10<sup>9</sup> = 1,000,000,000
+
+So 2<sup>69</sup> could be decomposed as 2<sup>70</sup> * 2<sup>-1</sup> (= 0.5), which in turn can be approximated to: 0.5 * 10<sup>21</sup>
+
+That's the amount of bits we have in that number: roughly _500 billion billion bits_.
+
+Ok, that's a huge amount of bits, now let's convert that to an actual number:
+
+2<sup>(5 * 10<sup>20</sup>)</sup>   ~   10<sup>(5 * 10<sup>19</sup> * 3)</sup> = 10<sup>(1.5 * 10<sup>20</sup>)</sup> = 10<sup>(10<sup>20</sup>)</sup> * 10<sup>(5 * 10<sup>19</sup>)</sup>
+
+So we have a number of: a _100 billion billion_ times a _50 billion billion_; which is **5 thousand billion billion billion billion** (or simply 5 * 10<sup>39</sup>).
 
 Hopefully I got the maths right, but anyway it is clear that we can represent a **very massive** number with this struct.
 
@@ -110,15 +117,15 @@ Add **UIntX** as a dependency to your `Package.swift` file. For more information
 - [Open a PR](https://github.com/rkreutz/UIntX/pull/new/master) if you want to make some change to `UIntX`.
 
 ## Roadmap
-[ ] Init from String
-    [ ] Decimal
-    [ ] Hex
-    [ ] Binary
-    [ ] Different Radix
-    [ ] Base64 string
-[ ] Codable conformance
-[ ] UInt1 
-[ ] Faster and more efficient operations
-    [ ] Multiplication
-    [ ] Division
-[ ] Any UnsignedInteger & FixedWidthInteger element to be used
+- [ ] Init from String
+    - [ ] Decimal
+    - [ ] Hex
+    - [ ] Binary
+    - [ ] Different Radix
+    - [ ] Base64 string  
+- [ ] Codable conformance
+- [ ] UInt1 
+- [ ] Faster and more efficient operations
+    - [ ] Multiplication
+    - [ ] Division
+- [ ] Any UnsignedInteger & FixedWidthInteger element to be used
