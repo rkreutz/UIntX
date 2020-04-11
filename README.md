@@ -1,6 +1,8 @@
 # UIntX
 ![Swift 5.1](https://img.shields.io/badge/Swift-5.1-orange.svg)
 [![Swift Package Manager](https://img.shields.io/badge/spm-compatible-brightgreen.svg?style=flat)](https://swift.org/package-manager)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+[![GitHub tag](https://img.shields.io/github/tag/rkreutz/UIntX.svg)](https://GitHub.com/rkreutz/UIntX/tags/)
 ![MacOS](https://github.com/rkreutz/UIntX/workflows/MacOS/badge.svg?branch=master&event=push)
 ![Linux](https://github.com/rkreutz/UIntX/workflows/Linux/badge.svg?branch=master&event=push)
 
@@ -90,9 +92,19 @@ That's the amount of bits we have in that number: roughly _500 billion billion b
 
 Ok, that's a huge amount of bits, now let's convert that to an actual number:
 
-2<sup>(5 * 10<sup>20</sup>)</sup>   ~   10<sup>(5 * 10<sup>19</sup> * 3)</sup> = 10<sup>(1.5 * 10<sup>20</sup>)</sup> = 10<sup>(10<sup>20</sup>)</sup> * 10<sup>(5 * 10<sup>19</sup>)</sup>
+2<sup>(5 * 10<sup>20</sup>)</sup>   ~   10<sup>(5 * 10<sup>19</sup> * 3)</sup> = 10<sup>(1.5 * 10<sup>20</sup>)</sup> = 10<sup>(10<sup>20</sup>)</sup> * 10<sup>(5 * 10<sup>19</sup>)</sup> = 10<sup>(10<sup>20</sup>)</sup> * 10<sup>(10<sup>19</sup>)</sup> * 10<sup>(10<sup>19</sup>)</sup> * 10<sup>(10<sup>19</sup>)</sup> * 10<sup>(10<sup>19</sup>)</sup> * 10<sup>(10<sup>19</sup>)</sup>
 
-So we have a number of: a _100 billion billion_ times a _50 billion billion_; which is **5 thousand billion billion billion billion** (or simply 5 * 10<sup>39</sup>).
+10<sup>20</sup> = _100 billion billions_
+
+10<sup>19</sup> = _10 billion billions_
+
+_100 billion billions_ + _10 billion billions_ + _10 billion billions_ + _10 billion billions_ + _10 billion billions_ + _10 billion billions_
+
+That's _150 billion billions_.
+
+That's only the power of the number by the way, so the actual number would be:
+
+**10<sup>_150 billion billions_</sup>**
 
 Hopefully I got the maths right, but anyway it is clear that we can represent a **very massive** number with this struct.
 
@@ -100,6 +112,8 @@ Having said that, **I'm forcefully limiting the number of words that can be stor
 ```swift
 UIntXConfig.maximumNumberOfWords = 128
 ```
+
+I'm doing so as a safety net, since I don't know how a program would behave having to hold such large numbers.
 
 You may change this value at any time, **but do it at your own risk**, I haven't tested `UIntX` using numbers past 8,192 bits (which is already a very large number) so I'd recommend sticking to that limit unless you know what you are doing.
 
