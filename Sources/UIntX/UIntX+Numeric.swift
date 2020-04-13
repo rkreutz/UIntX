@@ -65,8 +65,8 @@ extension UIntX: Numeric {
 
     public func quotientAndRemainder(dividingBy rhs: UIntX<Element>) -> QuotientAndReminder {
 
-        guard self > 0 && rhs > 1 else { return (0, 0) }
-
+        guard self > 0 && rhs > 0 else { return (0, 0) }
+        guard rhs > 1 else { return (self, 0) }
         guard self >= rhs else { return (0, self) }
 
         var quotient: UIntX<Element> = 0
