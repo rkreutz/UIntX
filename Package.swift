@@ -19,5 +19,6 @@ let package = Package(
             name: "UIntXTests",
             dependencies: ["UIntX"]
         ),
-    ]
+    ],
+    swiftLanguageVersions: [.v5]
 )
