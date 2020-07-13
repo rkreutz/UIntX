@@ -12,13 +12,15 @@ final class UIntXInitTests: XCTestCase {
         // Since UInt16 has 2 bytes, every element in the array must be considered a 2 bytes number, even if the
         // most significant byte is zero
         let value2 = UIntX<UInt8>(ascendingArray: [0x12, 0x34, 0x56] as [UInt16])
-        XCTAssertEqual(value2.parts, [0x56, 0x00, 0x34, 0x00, 0x12]) // Notice the 0 padding the 2 byte numbers. The first (most significant) might have its 0 padding stripped for improved performance.
+        // Notice the 0 padding the 2 byte numbers. The first (most significant) might have its 0 padding stripped for improved performance.
+        XCTAssertEqual(value2.parts, [0x56, 0x00, 0x34, 0x00, 0x12])
         XCTAssertEqual(value2, 0x5600340012)
 
         // Same for larger magnitude numbers
         let value3 = UIntX<UInt8>(ascendingArray: [0x12, 0x34] as [UInt64])
         XCTAssertEqual(value3.parts, [0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12])
-        XCTAssertEqual(value3.description, "0x340000000000000012") // Since Swift can't represent natively a number with more than 8 bytes we have to use the description to compare values
+        // Since Swift can't represent natively a number with more than 8 bytes we have to use the description to compare values
+        XCTAssertEqual(value3.description, "0x340000000000000012")
     }
 
     func testUIntX16Initialization() {
@@ -39,20 +41,23 @@ final class UIntXInitTests: XCTestCase {
         // Since UInt32 has 4 bytes, every element in the array must be considered a 4 bytes number, even if the
         // most significant byte is zero
         let value4 = UIntX<UInt16>(ascendingArray: [0x1234, 0x5678] as [UInt32])
-        XCTAssertEqual(value4.parts, [0x5678, 0x0000, 0x1234]) // Notice the 0 padding the 4 byte numbers. The first (most significant) might have its 0 padding stripped for improved performance.
+        // Notice the 0 padding the 4 byte numbers. The first (most significant) might have its 0 padding stripped for improved performance.
+        XCTAssertEqual(value4.parts, [0x5678, 0x0000, 0x1234])
         XCTAssertEqual(value4, 0x567800001234)
 
         // Same for larger magnitude numbers
         let value5 = UIntX<UInt16>(ascendingArray: [0x1234, 0x5678] as [UInt64])
         XCTAssertEqual(value5.parts, [0x5678, 0x0000, 0x0000, 0x0000, 0x1234])
-        XCTAssertEqual(value5.description, "0x56780000000000001234") // Since Swift can't represent natively a number with more than 8 bytes we have to use the description to compare values
+        // Since Swift can't represent natively a number with more than 8 bytes we have to use the description to compare values
+        XCTAssertEqual(value5.description, "0x56780000000000001234")
     }
 
     func testUIntX64Initialization() {
 
         let value1 = UIntX<UInt64>(ascendingArray: [0x1234567890123456, 0x7890123456789012] as [UInt64])
         XCTAssertEqual(value1.parts, [0x7890123456789012, 0x1234567890123456])
-        XCTAssertEqual(value1.description, "0x78901234567890121234567890123456") // Since Swift can't represent natively a number with more than 8 bytes we have to use the description to compare values
+        // Since Swift can't represent natively a number with more than 8 bytes we have to use the description to compare values
+        XCTAssertEqual(value1.description, "0x78901234567890121234567890123456")
 
         let value2 = UIntX<UInt64>(ascendingArray: [0x12, 0x34] as [UInt64])
         XCTAssertEqual(value2.parts, [0x34, 0x0000000000000012])
