@@ -5,6 +5,7 @@ public func allTests() -> [XCTestCaseEntry] {
     [
         testCase(UIntXComparableTests.allTests),
         testCase(UIntXDescription.allTests),
+        testCase(UIntXEquatable.allTests),
         testCase(UIntXHash.allTests),
         testCase(UIntXInitTests.allTests),
         testCase(UIntXLeftShiftTests.allTests),

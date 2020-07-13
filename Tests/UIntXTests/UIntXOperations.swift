@@ -7,7 +7,7 @@ final class UIntXOperations: XCTestCase {
 
         XCTAssertEqual(~UIntX8(0b00001010), 0b11110101)
         XCTAssertEqual(
-            ~UIntX8(ascendingArray: [0b01010101, 0b00001111, 0b11110000] as [UInt]),
+            ~UIntX8(ascendingArray: [0b01010101, 0b00001111, 0b11110000] as [UInt8]),
             0b000011111111000010101010
         )
     }
@@ -75,7 +75,7 @@ final class UIntXOperations: XCTestCase {
             UIntX8(ascendingArray: [UInt.max, 567_890])
                 .subtractingReportingOverflow(UIntX8(UInt.max))
                 .partialValue,
-            UIntX8(ascendingArray: [0, 0, 0, 0, 0, 0, 0, 0, 567_890] as [UInt])
+            UIntX8(ascendingArray: [0, 567_890] as [UInt])
         )
 
         XCTAssertEqual(
