@@ -2,14 +2,17 @@ extension Array {
 
     func removingFirst(where predicate: (Element) -> Bool) -> [Element] {
 
-        var array = [Element]()
-        var shouldContinueRemoving = true
-        for value in self {
-
-            shouldContinueRemoving = shouldContinueRemoving && predicate(value)
-            if !shouldContinueRemoving { array.append(value) }
+        if let contiguousMatchingIndex = firstIndex(where: { !predicate($0) }) {
+            return Array(dropFirst(contiguousMatchingIndex))
+        } else {
+            return []
         }
-        return array
+    }
+
+    func align(to size: Int, paddingElement: Element) -> [Element] {
+        let remainder = count % size
+        guard remainder != 0 else { return self }
+        return [Element](repeating: paddingElement, count: size - remainder) + self
     }
 
     func at(index: Index) -> Element? {

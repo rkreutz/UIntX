@@ -2,33 +2,54 @@ extension UIntX: Numeric {
 
     public var magnitude: UIntX { self }
 
-    public init?<Value>(exactly source: Value) where Value: BinaryInteger {
+    public init<Value>(exactly source: Value) where Value: BinaryInteger {
 
-        self.init(ascendingArray: Array(source.words))
+        self.init(littleEndianArray: Array(source.words))
     }
 
     // MARK: - Addition
 
     public func addingReportingOverflow(_ rhs: UIntX) -> (partialValue: UIntX, overflow: Bool) {
 
-        var values = [Element]()
+        let maxCount = Swift.max(parts.count, rhs.parts.count)
+        var values: [Element]
+        if parts.count > rhs.parts.count {
+            values = parts
+        } else if parts.count < rhs.parts.count {
+            values = rhs.parts
+        } else {
+            values = [Element](repeating: .zero, count: maxCount)
+        }
         var carriedOver: Element = 0
 
-        for index in 0 ..< Swift.max(parts.count, rhs.parts.count) {
+        for index in 0 ..< maxCount {
 
-            let lhsPart = parts.reversed().at(index: index) ?? 0
-            let rhsPart = rhs.parts.reversed().at(index: index) ?? 0
-            let (result1, overflow1) = lhsPart.addingReportingOverflow(rhsPart)
+            guard
+                index < parts.count,
+                index < rhs.parts.count
+            else {
+                let (result, overflow) = values[maxCount - 1 - index].addingReportingOverflow(carriedOver)
+                values[maxCount - 1 - index] = result
+                if overflow {
+                    carriedOver = 1
+                    continue
+                } else {
+                    carriedOver = 0
+                    break
+                }
+            }
+            let (result1, overflow1) = parts[parts.count - 1 - index].addingReportingOverflow(rhs.parts[rhs.parts.count - 1 - index])
             let (result2, overflow2) = result1.addingReportingOverflow(carriedOver)
-
-            values.append(result2)
+            values[maxCount - 1 - index] = result2
             carriedOver = overflow1 || overflow2 ? 1 : 0
         }
 
-        if carriedOver > 0 { values.append(carriedOver) }
+        if carriedOver > 0 { values = [carriedOver] + values }
 
         let (limitedValues, overflow) = values.removingOverflow()
-        return (UIntX(ascendingArray: limitedValues), overflow)
+        var value = UIntX()
+        value.parts = limitedValues
+        return (value, overflow)
     }
 
     public static func + (lhs: UIntX, rhs: UIntX) -> UIntX { lhs.addingReportingOverflow(rhs).partialValue }
@@ -38,22 +59,27 @@ extension UIntX: Numeric {
 
     public func subtractingReportingOverflow(_ rhs: UIntX) -> (partialValue: UIntX, overflow: Bool) {
 
-        var values = [Element]()
+        let maxCount = Swift.max(parts.count, rhs.parts.count)
+        var values = [Element](repeating: .zero, count: maxCount)
         var carriedOver: Element = 0
 
-        for index in 0 ..< Swift.max(parts.count, rhs.parts.count) {
+        for index in 0 ..< maxCount {
 
-            let lhsPart = parts.reversed().at(index: index) ?? 0
-            let rhsPart = rhs.parts.reversed().at(index: index) ?? 0
+            let lhsPart = parts.at(index: parts.count - 1 - index) ?? 0
+            let rhsPart = rhs.parts.at(index: rhs.parts.count - 1 - index) ?? 0
             let (result1, overflow1) = lhsPart.subtractingReportingOverflow(rhsPart)
             let (result2, overflow2) = result1.subtractingReportingOverflow(carriedOver)
 
-            values.append(result2)
+            values[maxCount - 1 - index] = result2
             carriedOver = overflow1 || overflow2 ? 1 : 0
         }
 
-        let (limitedValues, overflow) = values.removingOverflow()
-        return (UIntX(ascendingArray: limitedValues), carriedOver > 0 || overflow)
+        var value = UIntX()
+        value.parts = values.removingFirst(where: { $0 == 0 })
+        if value.parts.isEmpty {
+            value.parts = [Element.zero]
+        }
+        return (value, carriedOver > 0)
     }
 
     public static func - (lhs: UIntX, rhs: UIntX) -> UIntX { lhs.subtractingReportingOverflow(rhs).partialValue }
@@ -71,23 +97,19 @@ extension UIntX: Numeric {
 
         var quotient: UIntX<Element> = 0
         var remainder: UIntX<Element> = self
-        var partial: UIntX<Element> = 1
-        var chunk: UIntX<Element> = rhs
-        var trail: [(UIntX<Element>, UIntX<Element>)] = [(1, rhs)]
 
-        while remainder - chunk >= chunk {
-
-            chunk = chunk << 1
-            partial = partial << 1
-            trail.append((partial, chunk))
+        var diffBitWidth = (remainder.bitWidth - remainder.leadingZeroBitCount) - (rhs.bitWidth - rhs.leadingZeroBitCount)
+        while diffBitWidth > 0 {
+            if remainder >= (rhs << diffBitWidth) {
+                remainder -= rhs << diffBitWidth
+                quotient += 1 << diffBitWidth
+            }
+            diffBitWidth -= 1
         }
 
-        for (partial, chunk) in trail.reversed() {
-
-            guard remainder >= chunk else { continue }
-
-            remainder -= chunk
-            quotient += partial
+        if remainder >= rhs {
+            remainder -= rhs
+            quotient += 1
         }
 
         return (quotient, remainder)
