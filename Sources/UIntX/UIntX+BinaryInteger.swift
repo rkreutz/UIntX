@@ -41,17 +41,17 @@ extension UIntX: BinaryInteger {
 
     public init<T>(_ source: T) where T: BinaryInteger {
 
-        self.init(ascendingArray: Array(source.words))
+        self.init(littleEndianArray: Array(source.words))
     }
 
     public init<T>(clamping source: T) where T: BinaryInteger {
 
-        self.init(ascendingArray: Array(source.words))
+        self.init(littleEndianArray: Array(source.words))
     }
 
     public init<T>(truncatingIfNeeded source: T) where T: BinaryInteger {
 
-        self.init(ascendingArray: Array(source.words))
+        self.init(littleEndianArray: Array(source.words))
     }
 
     public init?<T>(exactly source: T) where T: BinaryFloatingPoint {
@@ -67,7 +67,9 @@ extension UIntX: BinaryInteger {
 
     public static prefix func ~ (value: UIntX<Element>) -> UIntX<Element> {
 
-        UIntX<Element>(ascendingArray: value.parts.reversed().map(~))
+        var mutatable = UIntX<Element>(value)
+        mutatable.parts = mutatable.parts.map(~)
+        return mutatable
     }
 
     public static func >>= <RHS>(lhs: inout UIntX<Element>, rhs: RHS) where RHS: BinaryInteger {
@@ -97,33 +99,33 @@ extension UIntX: BinaryInteger {
 
     public static func <<= <RHS>(lhs: inout UIntX<Element>, rhs: RHS) where RHS: BinaryInteger {
 
+        guard rhs > 0 else { return }
+        var missingLeadingParts = 0
         if lhs.leadingZeroBitCount < rhs {
 
             let overflowBits = Int(rhs) - lhs.leadingZeroBitCount
-            let missingLeadingParts = overflowBits / Element.bitWidth + 1
-            (0 ..< missingLeadingParts).forEach { _ in
-
-                lhs.parts = [0] + lhs.parts
-            }
+            missingLeadingParts = (overflowBits - 1) / Element.bitWidth + 1
         }
 
         let remainder = Int(rhs) % Element.bitWidth
         let multiple = Int(rhs) / Element.bitWidth
 
-        var result: [Element] = []
-        for index in multiple ..< lhs.parts.count {
+        var result = [Element](repeating: .zero, count: lhs.parts.count + missingLeadingParts)
+        for index in multiple ..< (lhs.parts.count + missingLeadingParts) {
 
-            var value = lhs.parts[index] << remainder
-            if index < (lhs.parts.count - 1) {
-
-                value |= lhs.parts[index + 1] >> (Element.bitWidth - remainder)
+            let value: Element
+            if remainder > 0 {
+                if index - missingLeadingParts == -1 {
+                    value = lhs.parts[index - missingLeadingParts + 1] >> (Element.bitWidth - remainder)
+                } else if index - missingLeadingParts == lhs.parts.count - 1 {
+                    value = lhs.parts[index - missingLeadingParts] << remainder
+                } else {
+                    value = (lhs.parts[index - missingLeadingParts] << remainder) | (lhs.parts[index - missingLeadingParts + 1] >> (Element.bitWidth - remainder))
+                }
+            } else {
+                value = lhs.parts[index - multiple]
             }
-            result.append(value)
-        }
-
-        for _ in (0 ..< multiple) {
-
-            result.append(0)
+            result[index - multiple] = value
         }
 
         lhs.parts = result.removingOverflow().result
@@ -131,51 +133,64 @@ extension UIntX: BinaryInteger {
 
     public static func &= (lhs: inout UIntX, rhs: UIntX) {
 
-        var values = [Element]()
-        for (offset, lhsPart) in lhs.parts.reversed().enumerated() {
-
-            guard let rhsPart = rhs.parts.reversed().at(index: offset) else { break }
-            values.append(lhsPart & rhsPart)
+        let minCount = Swift.min(lhs.parts.count, rhs.parts.count)
+        var values = [Element](repeating: .zero, count: minCount)
+        for index in 0 ..< minCount {
+            values[minCount - 1 - index] = lhs.parts[lhs.parts.count - 1 - index] & rhs.parts[rhs.parts.count - 1 - index]
         }
 
-        lhs = UIntX<Element>(ascendingArray: values)
+        lhs.parts = values.removingFirst(where: { $0 == 0 })
+        if lhs.parts.isEmpty {
+            lhs.parts = [.zero]
+        }
     }
 
     public static func |= (lhs: inout UIntX, rhs: UIntX) {
 
-        let max = Swift.max(lhs, rhs)
-        let min = Swift.min(lhs, rhs)
-        var values = [Element]()
-        for (offset, maxPart) in max.parts.reversed().enumerated() {
-
-            if let minPart = min.parts.reversed().at(index: offset) {
-
-                values.append(maxPart | minPart)
-            } else {
-
-                values.append(maxPart)
-            }
+        let maxCount = Swift.max(lhs.parts.count, rhs.parts.count)
+        var values: [Element]
+        if lhs.parts.count > rhs.parts.count {
+            values = lhs.parts
+        } else if lhs.parts.count < rhs.parts.count {
+            values = rhs.parts
+        } else {
+            values = [Element](repeating: .zero, count: maxCount)
         }
 
-        lhs = UIntX<Element>(ascendingArray: values)
+        for index in 0 ..< maxCount {
+            guard
+                index < lhs.parts.count,
+                index < rhs.parts.count
+            else { break }
+            values[maxCount - 1 - index] = lhs.parts[lhs.parts.count - 1 - index] | rhs.parts[rhs.parts.count - 1 - index]
+        }
+
+        lhs.parts = values
     }
 
     public static func ^= (lhs: inout UIntX, rhs: UIntX) {
 
-        let max = Swift.max(lhs, rhs)
-        let min = Swift.min(lhs, rhs)
-        var values = [Element]()
-        for (offset, maxPart) in max.parts.reversed().enumerated() {
-
-            if let minPart = min.parts.reversed().at(index: offset) {
-
-                values.append(maxPart ^ minPart)
-            } else {
-
-                values.append(maxPart)
-            }
+        let maxCount = Swift.max(lhs.parts.count, rhs.parts.count)
+        var values: [Element]
+        if lhs.parts.count > rhs.parts.count {
+            values = lhs.parts
+        } else if lhs.parts.count < rhs.parts.count {
+            values = rhs.parts
+        } else {
+            values = [Element](repeating: .zero, count: maxCount)
         }
 
-        lhs = UIntX<Element>(ascendingArray: values)
+        for index in 0 ..< maxCount {
+            guard
+                index < lhs.parts.count,
+                index < rhs.parts.count
+            else { break }
+            values[maxCount - 1 - index] = lhs.parts[lhs.parts.count - 1 - index] ^ rhs.parts[rhs.parts.count - 1 - index]
+        }
+
+        lhs.parts = values.removingFirst(where: { $0 == 0 })
+        if lhs.parts.isEmpty {
+            lhs.parts = [.zero]
+        }
     }
 }

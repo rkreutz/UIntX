@@ -67,10 +67,18 @@ final class UIntXLeftShiftTests: XCTestCase {
         }
     }
 
+    func testLeftShiftWord() {
+
+        let baseValue: UIntX8 = 0xff
+
+        XCTAssertEqual(baseValue << 8, 0xff00)
+    }
+
     static var allTests = [
         ("testLeftShiftUIntX8", testLeftShiftUIntX8),
         ("testLeftShiftUIntX16", testLeftShiftUIntX16),
         ("testLeftShiftUIntX32", testLeftShiftUIntX32),
-        ("testLeftShiftUIntX64", testLeftShiftUIntX64)
+        ("testLeftShiftUIntX64", testLeftShiftUIntX64),
+        ("testLeftShiftWord", testLeftShiftWord)
     ]
 }

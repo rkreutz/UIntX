@@ -2,6 +2,7 @@ extension UIntX: CustomStringConvertible {
 
     public var description: String {
 
+        let words = self.words
         guard words.count != 1 else { return "\(words[0])" }
 
         switch Element.bitWidth / 4 {

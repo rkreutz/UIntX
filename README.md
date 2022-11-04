@@ -32,18 +32,27 @@ let uintx: UIntX8 = 123
 The second preferred way of initialising it is through an array of values, where the **first element of the array is the least significant** number in the array and the **last element in the array is the most significant** number:
 ```swift
 let array: [UInt8] = [0x89, 0x67, 0x45, 0x23, 0x01]
-let uintx = UIntX8(ascendingArray: array)
+let uintx = UIntX8(littleEndianArray: array)
 uintx == 0x0123456789 // true
 ```
 
-Notice that on both initialisers values provided that are higher than the base value can handle will be decomposed into smaller values that the base value can handle, this is all done automatically so you can just throw in any value into `UIntX`. When using the `init(ascending:)` initialiser there is one caveat that you must be aware of, each element of the array will be treated as word of base value magnitude (after decomposing if necessary), here is an example using different base values:
+Notice that on both initialisers values provided that are higher than the base value can handle will be decomposed into smaller values that the base value can handle, this is all done automatically so you can just throw in any value into `UIntX`. When using the `init(littleEndianArray:)` initialiser there is one caveat that you must be aware of, each element of the array will be decomposed into N words of the base element if the array provided uses an element with greater magnitude (where `N == ArrayElement.bitWidth / BaseElement.bitWidth`), or elements in the array provided will be packed into equivalent `bitWidth` words of the base element, here is an example using different base values:
 ```swift
 let array: [UInt64] = [1, 2]
-let uintx8 = UIntX8(ascendingArray: array)
-let uintx64 = UIntX64(ascendingArray: array)
+let uintx8 = UIntX8(littleEndianArray: array)
+let uintx64 = UIntX64(littleEndianArray: array)
 
-uintx8 == 0x0201 // this is true, because even if the array has UInt64 values, the values could still be represented by UInt8 (the base value) so each of they will be stored as a single word of magnitude UInt8
-uintx64 == 0x00000000000000020000000000000001 // this is true since each element in the provided array will be a word of type UInt64 (base value). By the way, this wouldn't compile since the right side of the operation has 128-bits which can't be generated natively by swift's compiler, so you'd have a compiler error here, you may convert uintx64 to a string and check the string value which will be in hexadecimal 
+uintx8 == 0x020000000000000001 // since each element has 64 bits they will each be transformed into 8 words of 8 bits. The leading zeros are truncated
+uintx64 == 0x00000000000000020000000000000001
+
+// OR
+
+let array: [UInt8] = [1, 2]
+let uintx8 = UIntX8(littleEndianArray: array)
+let uintx64 = UIntX64(littleEndianArray: array)
+
+uintx8 == 0x0201
+uintx64 == 0x0000000000000201 // since each element has 8 bits they can be packed into the same word of the base element.
 ```
 
 Once you have your `UIntX` you may use it as any other unsigned binary integer value, which means most common operations are available:
