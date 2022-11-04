@@ -15,10 +15,8 @@ jobs:
     steps:
     - uses: swift-actions/setup-swift@v1
       with:
-        swift-version: "5.2"
+        swift-version: "5.5"
     - name: Checkout
       uses: actions/checkout@v2
-      with:
-        submodules: recursive
     - name: Run Tests
       run: swift test --skip PerformanceTests
