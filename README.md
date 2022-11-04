@@ -3,8 +3,7 @@
 [![Swift Package Manager](https://img.shields.io/badge/spm-compatible-brightgreen.svg?style=flat)](https://swift.org/package-manager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub tag](https://img.shields.io/github/tag/rkreutz/UIntX.svg)](https://GitHub.com/rkreutz/UIntX/tags/)
-![MacOS](https://github.com/rkreutz/UIntX/workflows/MacOS/badge.svg?branch=master&event=push)
-![Linux](https://github.com/rkreutz/UIntX/workflows/Linux/badge.svg?branch=master&event=push)
+[![Run Tests](https://github.com/rkreutz/UIntX/actions/workflows/tests.yml/badge.svg)](https://github.com/rkreutz/UIntX/actions/workflows/tests.yml)
 
 **UIntX** is the unsigned integer to rule them all. It can be used to represent any number, with _virtually_ no size constraints. So you can store unsigned integers of 64-bits (default on most modern computers), 128-bits, 256-bits, 512-bits, 1024-bits, 2048-bits, really whatever size you want may be stored in this one single container.
 
