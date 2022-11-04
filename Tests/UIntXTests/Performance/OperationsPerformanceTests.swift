@@ -142,12 +142,12 @@ final class OperationsPerformanceTests: XCTestCase {
 
     func testDivision() {
         UIntXConfig.maximumNumberOfWords = Int.max; defer { UIntXConfig.maximumNumberOfWords = 128 }
-        let sut: UIntX8 = UIntX8(littleEndianArray: [UInt8](repeating: 0xff, count: 131_072))
-        let sut2: UIntX8 = 50
+        let sut: UIntX8 = UIntX8(littleEndianArray: (0 ..< 1_024).map { _ in UInt8.random(in: 0 ... UInt8.max) })
+        let sut2: UIntX8 = UIntX8(littleEndianArray: (0 ..< 1_023).map { _ in UInt8.random(in: 0 ... UInt8.max) })
 
         measure {
             let result = sut / sut2
-            XCTAssertEqual(result.bitWidth, 1_048_571)
+            XCTAssertGreaterThan(result, 0)
         }
     }
 
@@ -159,17 +159,6 @@ final class OperationsPerformanceTests: XCTestCase {
         measure {
             let result = sut / sut2
             XCTAssertEqual(result.bitWidth, 16)
-        }
-    }
-
-    func testDivisionAlt3() {
-        UIntXConfig.maximumNumberOfWords = Int.max; defer { UIntXConfig.maximumNumberOfWords = 128 }
-        let sut: UIntX8 = UIntX8(littleEndianArray: (0 ..< 1_024).map { _ in UInt8.random(in: 0 ... UInt8.max) })
-        let sut2: UIntX8 = UIntX8(littleEndianArray: (0 ..< 1_023).map { _ in UInt8.random(in: 0 ... UInt8.max) })
-
-        measure {
-            let result = sut / sut2
-            XCTAssertGreaterThan(result, 0)
         }
     }
 
